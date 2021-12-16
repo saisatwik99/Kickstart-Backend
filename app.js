@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const cors = require('cors');
 
 const app = express();
 const store = new MongoDBStore({
@@ -15,7 +16,7 @@ dotenv.config();
 
 
 app.use(express.json());
-
+app.use(cors());
 const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/user');
 

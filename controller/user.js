@@ -14,14 +14,13 @@ exports.login = async (req, res, next) => {
     const token = jwt.sign({_id: user._id, email: user.email}, process.env.TOKEN_SECRET);
     console.log(token);
     req.session.authtoken = token;
-    res.send(token);
+    res.send({token}).status(201);
 }
 
 exports.signup = async (req, res, next) => {
 
     const { 
-        firstName,
-        lastName,
+        name,
         email,
         password,
         phoneNumber
@@ -36,12 +35,20 @@ exports.signup = async (req, res, next) => {
 
     try {
         const result = await User.create({ 
-            firstName, lastName, email, password: hashPassword,
+            name, email, password: hashPassword,
             phoneNumber
         });
-        res.send(result);
+        const token = jwt.sign({_id: result._id, email: result.email}, process.env.TOKEN_SECRET);
+        res.send({token});
     }
     catch(err) {
         res.status(400).send(err);
     }
+}
+
+exports.logout = (req, res, next) => {
+    req.session.destroy((err) => {
+        console.log("Successfully logged out");
+        res.status(200);
+    })
 }

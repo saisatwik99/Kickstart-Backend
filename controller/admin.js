@@ -7,7 +7,42 @@ const Slot = require('../models/slot');
 const Wishlist = require('../models/wishlist');
 const { CourierClient } = require("@trycourier/courier");
 const jwt = require('jsonwebtoken');
+const Joi = require('joi');
 
+const contactSchema = Joi.object({
+    email: Joi.string()
+        .email().required()
+        .messages({
+            'string.empty': `Email should not be empty.`,
+            'string.base': `Email should be a type of 'text'`,
+            'any.required': `Email is a required!`,
+            'string.email': `Email must be valid!`
+        }),
+    fullName: Joi.string().min(3).max(20).required()
+        .messages({
+            'string.empty': `Full Name should not be empty.`,
+            'string.base': `Full Name should be a type of 'text'`,
+            'string.max': `Full Name should have a maximum of 20 letters`,
+            'string.min': `Full Name should have a minimum of 3 letters`,
+            'any.required': `Full Name is a required!`
+        }),
+    subject: Joi.string().min(8).max(25).required()
+        .messages({
+            'string.empty': `Subject should not be empty.`,
+            'string.base': `Subject should be a type of 'text'`,
+            'string.max': `Subject should have a maximum of 25 letters`,
+            'string.min': `Subject should have a minimum of 8 letters`,
+            'any.required': `Subject is a required!`
+        }),
+    message: Joi.string().min(8).max(300).required()
+        .messages({
+            'string.empty': `Message should not be empty.`,
+            'string.base': `Message should be a type of 'text'`,
+            'string.max': `Message should have a maximum of 300 letters`,
+            'string.min': `Message should have a minimum of 8 letters`,
+            'any.required': `Message is a required!`
+        }),
+})
 
 exports.getTrending = async (req, res) => {
     const Trendings = await Trending.find();
@@ -59,12 +94,26 @@ exports.postProduct = async (req, res) => {
     }
 }
 
+exports.getproductInfo = async (req, res) => {
+    const { productId } = req.query;
+    var info = await Product.findOne({_id: productId});
+    if(!info) return res.send({message: "notFound"});
+    info.content2 = info.content2.substring(9);
+    res.send(info);
+}
+
 exports.getContact = async (req, res) => {
     const Contacts = await Contact.find();
     res.send(Object.values(Contacts));
 }
 
 exports.postContact = async (req, res) => {
+
+    const { error, value } = contactSchema.validate(req.body);
+    if(error) {
+        return res.send({message: error.details[0].message, red: 1});
+    }
+
     const {
         email, fullName, subject, message
     } = req.body;
@@ -72,7 +121,7 @@ exports.postContact = async (req, res) => {
         const result = await Contact.create({ 
             email, fullName, subject, message
         });
-        res.send(result);
+        res.send({ data: result, message: "We received your request. Our team will contact you shortly!", red: 0});
     }
     catch (err){
         res.status(400).send(err.message);
@@ -100,8 +149,22 @@ exports.postPricingTestinomial = async (req, res) => {
 }
 
 exports.getBlog = async (req, res) => {
-    const Blogs = await Blog.find();
-    res.send(Object.values(Blogs));
+    const { pageNum, pageSize } = req.query;
+    if(pageNum === undefined || pageSize === undefined || pageNum < 1){
+        const Items = await Blog.find();
+        return res.send(Items);
+    }
+    const skipNo = (pageNum-1)*pageSize;
+    const totalNumber = await Blog.count();
+    const Blogs = await Blog.find().skip(parseInt(skipNo)).limit(parseInt(pageSize));
+    let Pagination = { 
+        currentPage: pageNum,
+        pageSize: pageSize,
+        totalRecords: totalNumber,
+        totalPages: Math.ceil(totalNumber/pageSize)
+    }
+    var result = { data: Blogs, Pagination }
+    res.send(result);
 }
 
 exports.postBlog = async (req, res) => {
@@ -137,7 +200,7 @@ exports.postBook = async (req, res) => {
         userId: info._id, 
         email: info.email
     })
-    res.send(messageId);
+    res.send({ messageId, message: "We received your request. You will receive a mail shortly!" });
 }
 
 exports.getWishlist = async (req, res) => {
@@ -158,7 +221,7 @@ exports.postWishlist = async (req, res) => {
     const userId = _id;
     const present = await Wishlist.findOne({userId, productId});
     if(present){
-        return res.send("Already Wishlisted");
+        return res.send({ message: "Already Wishlisted"});
     }
         
     const {
@@ -168,7 +231,7 @@ exports.postWishlist = async (req, res) => {
         const result = await Wishlist.create({ 
             userId, email, productId, imageSrc, title, content1, content2, price, rating, reviews, category
         });
-        res.send(result);
+        res.send({message: "Successfully Wishlisted the Startup!" }).status(200);
     }
     catch (err){
         res.status(400).send(err.message);
@@ -181,7 +244,8 @@ exports.deleteWishlist = async (req, res) => {
     const userId = _id;
     try {
         const result = await Wishlist.findOneAndDelete({userId, productId});
-        res.send(result);
+        
+        res.send({ message: "Successfully deleted the Startup!" });
     }
     catch (err) {
         res.status(400).send(err.message);

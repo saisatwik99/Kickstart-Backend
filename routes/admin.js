@@ -7,6 +7,7 @@ router.get('/trending', adminController.getTrending);
 router.post('/trending', adminController.postTrending);
 router.get('/product', adminController.getProduct);
 router.post('/product', adminController.postProduct);
+router.get('/productInfo', adminController.getproductInfo);
 router.get('/contact', adminController.getContact);
 router.post('/contact', adminController.postContact);
 router.get('/pricingTestinomial', adminController.getPricingTestinomial);

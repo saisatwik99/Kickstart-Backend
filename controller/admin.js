@@ -9,6 +9,7 @@ const { CourierClient } = require("@trycourier/courier");
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
+// Contact Schema Validation
 const contactSchema = Joi.object({
     email: Joi.string()
         .email().required()
@@ -44,11 +45,13 @@ const contactSchema = Joi.object({
         }),
 })
 
+// Get Trending Items
 exports.getTrending = async (req, res) => {
     const Trendings = await Trending.find();
     res.send(Object.values(Trendings));
 }
 
+// Post Trending Items 
 exports.postTrending = async (req, res) => {
     const {
         imageSrc,
@@ -70,6 +73,7 @@ exports.postTrending = async (req, res) => {
     }
 }
 
+// Get Product Items
 exports.getProduct = async (req, res) => {
     var result = {Fintech: [], AI: [], Food: [], EdTech: []};
     result.Fintech = await Product.find({category: 'Fintech'});
@@ -79,6 +83,7 @@ exports.getProduct = async (req, res) => {
     res.send(result);
 }
 
+// Post Product Items
 exports.postProduct = async (req, res) => {
     const {
         imageSrc, title, content1, content2, price, rating, reviews, category
@@ -94,19 +99,22 @@ exports.postProduct = async (req, res) => {
     }
 }
 
+// Get Complete Product Info by Product ID
 exports.getproductInfo = async (req, res) => {
     const { productId } = req.query;
     var info = await Product.findOne({_id: productId});
-    if(!info) return res.send({message: "notFound"});
+    if(!info) return res.send({error: 400});
     info.content2 = info.content2.substring(9);
     res.send(info);
 }
 
+// Get all contact details
 exports.getContact = async (req, res) => {
     const Contacts = await Contact.find();
     res.send(Object.values(Contacts));
 }
 
+// Post Contact Details
 exports.postContact = async (req, res) => {
 
     const { error, value } = contactSchema.validate(req.body);
@@ -128,11 +136,13 @@ exports.postContact = async (req, res) => {
     }
 }
 
+// Get Testinomial
 exports.getPricingTestinomial = async (req, res) => {
     const PricingTestinomials = await PricingTestinomial.find();
     res.send(Object.values(PricingTestinomials));
 }
 
+// Post Testinomials
 exports.postPricingTestinomial = async (req, res) => {
     const {
         imageSrc, quote, customerName
@@ -148,6 +158,7 @@ exports.postPricingTestinomial = async (req, res) => {
     }
 }
 
+// Get all Blog
 exports.getBlog = async (req, res) => {
     const { pageNum, pageSize } = req.query;
     if(pageNum === undefined || pageSize === undefined || pageNum < 1){
@@ -167,6 +178,7 @@ exports.getBlog = async (req, res) => {
     res.send(result);
 }
 
+// Post Blogs
 exports.postBlog = async (req, res) => {
     
     try {
@@ -178,7 +190,7 @@ exports.postBlog = async (req, res) => {
     }
 }
 
-
+// Book a Service
 exports.postBook = async (req, res) => {
     const { token } = req.body;
     const info = jwt.decode(token);
@@ -203,6 +215,7 @@ exports.postBook = async (req, res) => {
     res.send({ messageId, message: "We received your request. You will receive a mail shortly!" });
 }
 
+// Get Wishlisted Startups bu User ID
 exports.getWishlist = async (req, res) => {
     const { token } = req.query;
     const info = jwt.decode(token);
@@ -215,6 +228,7 @@ exports.getWishlist = async (req, res) => {
     res.send(result);
 }
 
+// Post Wishlisted Startup
 exports.postWishlist = async (req, res) => {
     const { productId, token } = req.body;
     const { _id, email } = jwt.decode(token);
@@ -238,6 +252,7 @@ exports.postWishlist = async (req, res) => {
     }
 }
 
+// Delete a Wishlisted Startup
 exports.deleteWishlist = async (req, res) => {
     const { productId, token } = req.body;
     const { _id, email } = jwt.decode(token);

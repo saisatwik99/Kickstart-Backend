@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
+// Login Schema Validation
 const loginSchema = Joi.object({
     email: Joi.string()
         .email().required()
@@ -22,6 +23,7 @@ const loginSchema = Joi.object({
     })
 })
 
+// Sign up Schema Validation
 const signupSchema = Joi.object({
     name: Joi.string().min(3).max(20).required()
         .messages({
@@ -57,6 +59,7 @@ const signupSchema = Joi.object({
     })
 })
 
+// Login Controller
 exports.login = async (req, res, next) => {
 
     const { error, value } = loginSchema.validate(req.body);
@@ -71,12 +74,13 @@ exports.login = async (req, res, next) => {
     if(!validPass) return res.send({message: 'Incorrect password'}).status(401);
 
     
-    const token = jwt.sign({_id: user._id, email: user.email}, process.env.TOKEN_SECRET);
+    const token = jwt.sign({_id: user._id, email: user.email}, "kickstart");
     console.log(token);
     req.session.authtoken = token;
     res.send({token}).status(201);
 }
 
+// Signup Controller
 exports.signup = async (req, res, next) => {
 
     const { error, value } = signupSchema.validate(req.body);
@@ -103,7 +107,7 @@ exports.signup = async (req, res, next) => {
             name, email, password: hashPassword,
             phoneNumber
         });
-        const token = jwt.sign({_id: result._id, email: result.email}, process.env.TOKEN_SECRET);
+        const token = jwt.sign({_id: result._id, email: result.email}, "kickstart");
         res.send({token});
     }
     catch(err) {
@@ -111,6 +115,7 @@ exports.signup = async (req, res, next) => {
     }
 }
 
+// Logout Controller
 exports.logout = (req, res, next) => {
     req.session.destroy((err) => {
         console.log("Successfully logged out");

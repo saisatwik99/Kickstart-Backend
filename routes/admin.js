@@ -9,6 +9,7 @@ router.post('/trending', adminController.postTrending);
 // Product URL Get and Post Request
 router.get('/product', adminController.getProduct);
 router.post('/product', adminController.postProduct);
+router.post('/product/delete', adminController.deleteProduct);
 // Product Info URL Get
 router.get('/productInfo', adminController.getproductInfo);
 // Contact URL Get and Post Request

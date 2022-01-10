@@ -99,6 +99,18 @@ exports.postProduct = async (req, res) => {
     }
 }
 
+exports.deleteProduct = async (req, res) => {
+    const { productId } = req.body;
+    try {
+        const result = await Product.findOneAndDelete({_id: productId});
+        
+        res.send({ message: "Successfully deleted the Startup!" });
+    }
+    catch (err) {
+        res.status(400).send(err.message);
+    }
+}
+
 // Get Complete Product Info by Product ID
 exports.getproductInfo = async (req, res) => {
     const { productId } = req.query;

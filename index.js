@@ -35,6 +35,9 @@ app.use(
   }))
 
 // Two Routes
+app.get("/", (req, res) => {
+  res.send("I am live!");
+})
 app.use("/admin",adminRoutes);
 app.use("/user",userRoutes);
 

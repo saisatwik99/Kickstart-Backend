@@ -4,16 +4,20 @@ const Schema = mongoose.Schema;
 
 const blogSchema = new Schema({
   postImageSrc: {
-    type: String
+    type: String,
+    required: true
   },
   title: {
-    type: String
+    type: String,
+    required: true
   },
   authorName: {
-    type: String
+    type: String,
+    required: true
   },
   url: {
-    type: String
+    type: String,
+    required: true
   }
 });
 

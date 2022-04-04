@@ -3,7 +3,15 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const trendingSchema = new Schema({
-  imageSrc: {
+  image: {
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  price: {
     type: String,
     required: true
   },
@@ -11,23 +19,15 @@ const trendingSchema = new Schema({
     type: String,
     required: true
   },
-  pricePerDay: {
-    type: String,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
   trendingText: {
     type: String,
     required: true
   },
-  durationText: {
+  soldTime: {
     type: String,
     required: true
   },
-  locationText: {
+  location: {
     type: String,
     required: true
   }

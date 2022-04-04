@@ -64,20 +64,20 @@ exports.login = async (req, res, next) => {
 
     const { error, value } = loginSchema.validate(req.body);
     if(error) {
-        return res.send({message: error.details[0].message});
+        return res.status(400).send({message: error.details[0].message});
     }
 
     const user = await User.findOne({ email: req.body.email });
-    if(!user)  return res.send({message: 'Email not found'}).status(401);
+    if(!user)  return res.status(401).send({message: 'Email not found'});
 
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if(!validPass) return res.send({message: 'Incorrect password'}).status(401);
+    if(!validPass) return res.status(401).send({message: 'Incorrect password'});
 
     
     const token = jwt.sign({_id: user._id, email: user.email}, "kickstart");
     console.log(token);
     req.session.authtoken = token;
-    res.send({token}).status(201);
+    res.status(201).send({token});
 }
 
 // Signup Controller
@@ -85,7 +85,7 @@ exports.signup = async (req, res, next) => {
 
     const { error, value } = signupSchema.validate(req.body);
     if(error){
-        return res.send({message: error.details[0].message});
+        return res.status(400).send({message: error.details[0].message});
     }
 
     const { 
@@ -96,7 +96,7 @@ exports.signup = async (req, res, next) => {
     } = req.body;
 
     const emailExist = await User.findOne({email});
-    if(emailExist) return res.status(400).send({message: 'Email already exists'});
+    if(emailExist) return res.status(401).send({message: 'Email already exists'});
 
     // Hash Passwords
     const salt = await bcrypt.genSalt(10);
@@ -108,7 +108,7 @@ exports.signup = async (req, res, next) => {
             phoneNumber
         });
         const token = jwt.sign({_id: result._id, email: result.email}, "kickstart");
-        res.send({token});
+        res.status(201).send({token});
     }
     catch(err) {
         res.status(400).send(err);

@@ -11,7 +11,7 @@ const wishlistSchema = new Schema({
     type: String,
     required: true
   },
-  productId: {
+  companyId: {
     type: String,
     required: true
   },

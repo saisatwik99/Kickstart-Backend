@@ -1,0 +1,841 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Kickstart
+  description: Server for Kickstart
+
+servers:
+  - url: http://localhost:5000
+  - url: https://kickstart-backend.herokuapp.com
+
+tags:
+  - name: User
+    description: API to manage User
+  - name: Trending
+    description: API to manage the Trending Companies
+  - name: Company
+    description: API to manage the Companies
+  - name: Contact
+    description: API to manage Contact details
+  - name: Testinomial
+    description: API to manage Testinomials
+  - name: Blog
+    description: API to manage Blog
+  - name: Slot
+    description: API to manage slot booking
+  - name: Wishlist
+    description: API to manage Wishlist
+
+paths:
+  /user/login:
+    post:
+      summary: "Login to Kickstart"
+      tags: [User]
+      requestBody:
+        description: Data required to login to kickstart
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "201":
+          description: User Token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        "400": 
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401": 
+          description: Authentication Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /user/signup:
+    post:
+      summary: "Signup to Kickstart"
+      tags: [User]
+      requestBody:
+        description: Data required to login to kickstart
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: User Token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        "400": 
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401": 
+          description: Authentication Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /admin/trending:
+    get:
+      summary: Get all the Trending Companies 
+      tags: [Trending]
+      responses: 
+        "200":
+          description: List of Companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trending"
+    post:
+      summary: Add to trending Companies
+      tags: [Trending]
+      requestBody:
+        description: Data required to add trending company
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Trending"
+      responses:
+        "200":
+          description: Added Company details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trending"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Trending validation failed: location: Path `location` is required."
+  /admin/company:
+    get:
+      summary: "Get all companies"
+      tags: [Company]
+      responses: 
+        "200":
+          description: List of Companies
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/GetCompanyResponse"
+    post:
+      summary: "Add a Company"
+      tags: [Company]
+      requestBody:
+        description: Data required to add a company
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PostCompany"
+      responses:
+        "200":
+          description: Add a Company
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+      "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Company validation failed: title: Path `title` is required."
+  /admin/company/delete:
+    post:
+      summary: "Delete a Company"
+      tags: [Company]
+      requestBody:
+        description: Data required to delete a company
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteCompanyRequest"
+      responses: 
+        "200": 
+          description: Delete a Company
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Unable to delete Company
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unable to find the company"
+  /admin/companyInfo:
+    get:
+      summary: Get complete Company info
+      tags: [Company]
+      parameters:
+        - in: query
+          name: companyId
+          schema:
+            type: string
+          required: true
+          description: Company ID
+      responses:
+        "200":
+          description: Company Info
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/Company"
+  /admin/contact:
+    get:
+      summary: "Get all messages"
+      tags: [Contact]
+      responses: 
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+    post:
+      summary: Send a message
+      tags: [Contact]
+      requestBody:
+        description: Data required to send Message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactRequest"
+      responses:
+        "200":
+          description: Message Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactResponse"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Contact validation failed: email: Path `email` is required."
+  /admin/pricingTestinomial:
+    get:
+      summary: "Get all Testinomials"
+      tags: [Testinomial]
+      responses: 
+        "200":
+          description: List of all testinomials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PricingTestinomial"
+    post:
+      summary: Add a Testinomial
+      tags: [Testinomial]
+      requestBody:
+        description: Data required to add Testinomial
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PricingTestinomial"
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PricingTestinomial"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Pricing Testinomial validation failed: email: Path `email` is required."
+  /admin/blog:
+    get:
+      summary: "Get all Blogs"
+      tags: [Blog]
+      responses: 
+        "200":
+          description: List of all Blogs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Blog"
+    post:
+      summary: Add a Blog
+      tags: [Blog]
+      requestBody:
+        description: Data required to add Blog
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Blog"
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Blog"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Blog validation failed: title: Path `title` is required."
+  /admin/book:
+    post:
+      summary: Book a Slot
+      tags: [Slot]
+      requestBody:
+        description: Data required to book a slot
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+  /admin/wishlist:
+    get:
+      summary: "Get Wishlist for a User"
+      tags: [Wishlist]
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Token of User
+      responses: 
+        "200":
+          description: Wishlist of User
+          content:
+            application/json:
+              schema:
+                  $ref: "#/components/schemas/GetWishlistResponse"
+    post:
+      summary: Add a Wishlist
+      tags: [Wishlist]
+      requestBody:
+        description: Data required to add Wishlist
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostWishlistRequest"
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Wishlist validation failed: companyId: Path `CompanyId` is required."
+  /admin/wishlist/delete:
+    post:
+      summary: "Delete a Company from Wishlist"
+      tags: [Wishlist]
+      requestBody:
+        description: Data required to delete a company from Wishlist
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostWishlistRequest"
+      responses: 
+        "200": 
+          description: Delete a Company from Wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Unable to delete Company from Wishlist
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unable to find the company in Wishlist"
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      request: 
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: "Email ID of User"
+          example: "saisatwik@gmail.com"
+        password:
+          type: string
+          description: "Password of User"
+          example: "saisatwik"
+    Token:
+      type: object
+      request:
+        - token
+      properties:
+        token:
+          type: string
+          description: "Token of User"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ3YmIwY2RlODJjYmJjZmY2NjE4YjMiLCJlbWFpbCI6InNhaXNhdHdpazk5QGdtYWlsLmNvbSIsImlhdCI6MTY0OTA0ODc1Mn0.JQ2nj-LaYyogEVicVCntUWf8fxm09WTQ1mLEkjLNI4w"
+    SignupRequest:
+      type: object
+      request: 
+        - name
+        - email
+        - phoneNumber
+        - password
+      properties:
+        name:
+          type: string
+          description: "Name of User"
+          example: "Sai Satwik"
+        email:
+          type: string
+          description: "Email ID of User"
+          example: "saisatwik@gmail.com"
+        phoneNumber:
+          type: string
+          description: "Phone Number of User"
+          example: "8124109325"
+        password:
+          type: string
+          description: "Password of User"
+          example: "saisatwik"
+    Trending:
+      type: object
+      required:
+        - image
+        - name
+        - price
+        - type
+        - trendingText
+        - soldTime
+        - location
+      properties:
+        image:
+          type: string
+          description: Company Image URL
+          example: "https://images.unsplash.com/photo-1592920704646&auto=format&fit=crop&w=768&q=80"
+        name:
+          type: string
+          description: Name of the Company
+          example: "Stripe"
+        price:
+          type: string
+          example: "35B"
+        type:
+          type: string
+          description: "Field of Company"
+          example: "Fintech"
+        trendingText:
+          type: string
+          example: "Trending"
+        soldTime:
+          type: string
+          description: Sold time of the Company
+          example: "9 days ago"
+        location:
+          type: string
+          description: Location of company
+          example: "San Francisco"
+    PostCompany:
+      type: object
+      required:
+        - image
+        - title
+        - content1
+        - content2
+        - price
+        - rating
+        - reviews
+        - category
+      properties:
+        image: 
+          type: file
+          description: "Company Image URL"
+        title:
+          type: string
+          description: "Name of the company"
+          example: "Airbnb"
+        content1:
+          type: string
+          description: "Information about company"
+          example: "Y Combinator 2008"
+        content2:
+          type: string
+          description: "Revenue of company"
+          example: "Revenue: $3.378B"
+        price:
+          type: string
+          description: "Price of company"
+          example: "$101B"
+        rating:
+          type: string
+          description: "Rating of company"
+          example: "5.0"
+        reviews:
+          type: string
+          description: "Count of company reviews"
+          example: "999999"
+        category:
+          type: string
+          description: "Field of Company"
+          example: "Fintech"
+    Company:
+      type: object
+      required:
+        - imageSrc
+        - title
+        - content1
+        - content2
+        - price
+        - rating
+        - reviews
+        - category
+      properties:
+        imageSrc: 
+          type: string
+          description: "Company Image URL"
+          example: "https://images.unsplash.com/photo-1592920704646&auto=format&fit=crop&w=768&q=80"
+        title:
+          type: string
+          description: "Name of the company"
+          example: "Airbnb"
+        content1:
+          type: string
+          description: "Information about company"
+          example: "Y Combinator 2008"
+        content2:
+          type: string
+          description: "Revenue of company"
+          example: "Revenue: $3.378B"
+        price:
+          type: string
+          description: "Price of company"
+          example: "$101B"
+        rating:
+          type: string
+          description: "Rating of company"
+          example: "5.0"
+        reviews:
+          type: string
+          description: "Count of company reviews"
+          example: "999999"
+        category:
+          type: string
+          description: "Field of Company"
+          example: "Fintech"
+    GetCompanyResponse:
+      type: object
+      required:
+        - Fintech
+        - AI
+        - Food
+        - EdTech
+      properties: 
+        Fintech:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Company"
+        AI:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+        Food:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+        EdTech:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+    Message:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: "Message of Response"
+          example: "Successfully deleted the Startup!"
+    DeleteCompanyRequest:
+      type: object
+      required:
+        - companyId
+      properties:
+        companyId:
+          type: string
+          description: "Company ID"
+          example: "6249a7204a56a99f853e5e18"
+    Contact:
+      type: object
+      required:
+        - email
+        - fullName
+        - subject
+        - message
+        - createdAt
+      properties:
+        email:
+          type: string
+          description: "Email"
+          example: "saisatwik@google.com"
+        fullName:
+          type: string
+          description: "Name"
+          example: "Sai Satwik"
+        subject: 
+          type: string
+          description: "Subject"
+          example: "Want to contact Founder"
+        message: 
+          type: string
+          description: "Message"
+          example: "I wanted to contact Flinch founder I am interested in buying that"
+        createdAt: 
+          type: string
+          description: "Created Date and Time"
+          example: "2022-01-05T10:46:28.340+00:00"
+    ContactRequest:
+      type: object
+      required:
+        - email
+        - fullName
+        - subject
+        - message
+      properties:
+        email:
+          type: string
+          description: "Email"
+          example: "saisatwik@google.com"
+        fullName:
+          type: string
+          description: "Name"
+          example: "Sai Satwik"
+        subject: 
+          type: string
+          description: "Subject"
+          example: "Want to contact Founder"
+        message: 
+          type: string
+          description: "Message"
+          example: "I wanted to contact Flinch founder I am interested in buying that"
+    ContactResponse:
+      type: object
+      required:
+        - data
+        - message
+        - red
+      properties:
+        data:
+          $ref: "#/components/schemas/ContactResponse"
+        message: 
+          type: string
+          description: "Message"
+          example: "We received your request. Our team will contact you shortly!"
+        red:
+          type: integer
+    PricingTestinomial:
+      type: object
+      required:
+        - imageSrc
+        - quote
+        - customerName
+      properties:
+        imageSrc:
+          type: string
+          example: "https://images.unsplash.com/photo-1531427186611"
+        quote:
+          type: string
+          example: "We used kickstart to sell our company and the experience was excellent"
+        customerName:
+          type: string
+          example: "Kunal Shah"
+    Blog:
+      type: object
+      required:
+        - postImageSrc
+        - title
+        - authorName
+        - url
+      properties:
+        postImageSrc:
+          type: string
+          example: "https://images.unsplash.com/photo-1531427186611"
+        title:
+          type: string
+          example: "How I made $10M in one year"
+        authorName:
+          type: string
+          example: "Sai Satwik"
+        url: 
+          type: string
+          example: "https://medium.com/1531427186611"
+    BookRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ3YmIwY2RlODJjYmJjZmY2NjE4YjMiLCJlbWFpbCI6InNhaXNhdHdpazk5QGdtYWlsLmNvbSIsImlhdCI6MTY0MTczMjUzNH0.Y-bkXHHNPk_Z25-pJR1165le1w4Th5EDF8MpyUQTPGg"
+    BookResponse:
+      type: object
+      required:
+        - messageId
+        - message
+      properties:
+        messageId:
+          type: string
+          example: "34567823456"
+        message:
+          type: string
+          example: "We received your request. You will receive a mail shortly!"
+    Wishlist:
+      type: object
+      required: 
+        - userId
+        - email
+        - companyId
+        - imageSrc
+        - title
+        - content1
+        - content2
+        - price
+        - rating
+        - reviews
+        - category
+      properties:
+        userId:
+          type: string
+          description: "User ID"
+          example: "61d7bb0cde82cbbcff6618b3"
+        email: 
+          type: string
+          description: "Email of User"
+          example: "saisatwik99@gmail.com"
+        companyId:
+          type: string
+          description: "Company ID"
+          example: "61dc34a24e0e46d311567313"
+        imageSrc: 
+          type: string
+          description: "Company Image URL"
+          example: "https://images.unsplash.com/photo-1592920704646&auto=format&fit=crop&w=768&q=80"
+        title:
+          type: string
+          description: "Name of the company"
+          example: "Airbnb"
+        content1:
+          type: string
+          description: "Information about company"
+          example: "Y Combinator 2008"
+        content2:
+          type: string
+          description: "Revenue of company"
+          example: "Revenue: $3.378B"
+        price:
+          type: string
+          description: "Price of company"
+          example: "$101B"
+        rating:
+          type: string
+          description: "Rating of company"
+          example: "5.0"
+        reviews:
+          type: string
+          description: "Count of company reviews"
+          example: "999999"
+        category:
+          type: string
+          description: "Field of Company"
+          example: "Fintech"
+    GetWishlistResponse:
+      type: object
+      required:
+        - Fintech
+        - AI
+        - Food
+        - EdTech
+      properties: 
+        Fintech:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Wishlist"
+        AI:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wishlist"
+        Food:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wishlist"
+        EdTech:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wishlist" 
+    PostWishlistRequest:
+      type: object
+      required:
+        - companyId
+        - token
+      properties:
+        companyId:
+          type: string
+          description: "Company ID"
+          example: "61dc34a24e0e46d311567313"
+        token:
+          type: string
+          description: "Token of User"
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ3YmIwY2RlODJjYmJjZmY2NjE4YjMiLCJlbWFpbCI6InNhaXNhdHdpazk5QGdtYWlsLmNvbSIsImlhdCI6MTY0MTczMjUzNH0.Y-bkXHHNPk_Z25-pJR1165le1w4Th5EDF8MpyUQTPGg"
+        
+        

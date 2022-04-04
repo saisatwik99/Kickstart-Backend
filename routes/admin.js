@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('../routes/multer');
 
 const adminController = require('../controller/admin');
 
 // Trending URL Get and Post Request
 router.get('/trending', adminController.getTrending);
 router.post('/trending', adminController.postTrending);
-// Product URL Get and Post Request
-router.get('/product', adminController.getProduct);
-router.post('/product', adminController.postProduct);
-router.post('/product/delete', adminController.deleteProduct);
-// Product Info URL Get
-router.get('/productInfo', adminController.getproductInfo);
+// Company URL Get and Post Request
+router.get('/company', adminController.getCompany);
+router.post('/company', multer.multerUploads, adminController.postCompany);
+router.post('/company/delete', adminController.deleteCompany);
+// Company Info URL Get
+router.get('/companyInfo', adminController.getCompanyInfo);
 // Contact URL Get and Post Request
 router.get('/contact', adminController.getContact);
 router.post('/contact', adminController.postContact);

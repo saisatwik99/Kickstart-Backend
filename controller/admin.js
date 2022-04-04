@@ -1,5 +1,5 @@
 const Trending = require('../models/trending');
-const Product = require('../models/product');
+const Company = require('../models/company');
 const Contact = require('../models/contact');
 const PricingTestinomial = require('../models/pricingTestinomials');
 const Blog = require('../models/blog');
@@ -8,6 +8,7 @@ const Wishlist = require('../models/wishlist');
 const { CourierClient } = require("@trycourier/courier");
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
+const cloudinary = require('../config/cloudinaryConfig');
 
 // Contact Schema Validation
 const contactSchema = Joi.object({
@@ -54,17 +55,17 @@ exports.getTrending = async (req, res) => {
 // Post Trending Items 
 exports.postTrending = async (req, res) => {
     const {
-        imageSrc,
+        image,
+        name,
+        price,
         type,
-        pricePerDay,
-        title,
         trendingText,
-        durationText,
-        locationText  
+        soldTime,
+        location  
     } = req.body;
     try {
         const result = await Trending.create({ 
-            imageSrc, type, pricePerDay, title, trendingText, durationText, locationText
+            image, name, price, type, trendingText, soldTime, location 
         });
         res.send(result);
     }
@@ -73,24 +74,25 @@ exports.postTrending = async (req, res) => {
     }
 }
 
-// Get Product Items
-exports.getProduct = async (req, res) => {
+// Get Company Items
+exports.getCompany = async (req, res) => {
     var result = {Fintech: [], AI: [], Food: [], EdTech: []};
-    result.Fintech = await Product.find({category: 'Fintech'});
-    result.AI = await Product.find({category: 'AI'});
-    result.Food = await Product.find({category: 'Food'});
-    result.EdTech = await Product.find({category: 'EdTech'});
+    result.Fintech = await Company.find({category: 'Fintech'});
+    result.AI = await Company.find({category: 'AI'});
+    result.Food = await Company.find({category: 'Food'});
+    result.EdTech = await Company.find({category: 'EdTech'});
     res.send(result);
 }
 
-// Post Product Items
-exports.postProduct = async (req, res) => {
+// Post Company Items
+exports.postCompany = async (req, res) => {
+    const imgResult = await cloudinary.uploader.upload(req.file.path);
     const {
-        imageSrc, title, content1, content2, price, rating, reviews, category
+        title, content1, content2, price, rating, reviews, category
     } = req.body;
     try {
-        const result = await Product.create({ 
-            imageSrc, title, content1, content2, price, rating, reviews, category
+        const result = await Company.create({ 
+            imageSrc: imgResult.url, title, content1, content2, price, rating, reviews, category
         });
         res.send(result);
     }
@@ -99,10 +101,10 @@ exports.postProduct = async (req, res) => {
     }
 }
 
-exports.deleteProduct = async (req, res) => {
-    const { productId } = req.body;
+exports.deleteCompany = async (req, res) => {
+    const { companyId } = req.body;
     try {
-        const result = await Product.findOneAndDelete({_id: productId});
+        const result = await Company.findOneAndDelete({_id: companyId});
         
         res.send({ message: "Successfully deleted the Startup!" });
     }
@@ -111,10 +113,10 @@ exports.deleteProduct = async (req, res) => {
     }
 }
 
-// Get Complete Product Info by Product ID
-exports.getproductInfo = async (req, res) => {
-    const { productId } = req.query;
-    var info = await Product.findOne({_id: productId});
+// Get Complete Company Info by Company ID
+exports.getCompanyInfo = async (req, res) => {
+    const { companyId } = req.query;
+    var info = await Company.findOne({_id: companyId});
     if(!info) return res.send({error: 400});
     info.content2 = info.content2.substring(9);
     res.send(info);
@@ -242,20 +244,20 @@ exports.getWishlist = async (req, res) => {
 
 // Post Wishlisted Startup
 exports.postWishlist = async (req, res) => {
-    const { productId, token } = req.body;
+    const { companyId, token } = req.body;
     const { _id, email } = jwt.decode(token);
     const userId = _id;
-    const present = await Wishlist.findOne({userId, productId});
+    const present = await Wishlist.findOne({userId, companyId});
     if(present){
         return res.send({ message: "Already Wishlisted"});
     }
         
     const {
         imageSrc, title, content1, content2, price, rating, reviews, category
-    } = await Product.findOne({_id: productId});
+    } = await Company.findOne({_id: companyId});
     try {
         const result = await Wishlist.create({ 
-            userId, email, productId, imageSrc, title, content1, content2, price, rating, reviews, category
+            userId, email, companyId, imageSrc, title, content1, content2, price, rating, reviews, category
         });
         res.send({message: "Successfully Wishlisted the Startup!" }).status(200);
     }
@@ -266,13 +268,15 @@ exports.postWishlist = async (req, res) => {
 
 // Delete a Wishlisted Startup
 exports.deleteWishlist = async (req, res) => {
-    const { productId, token } = req.body;
+    const { companyId, token } = req.body;
     const { _id, email } = jwt.decode(token);
     const userId = _id;
     try {
-        const result = await Wishlist.findOneAndDelete({userId, productId});
-        
-        res.send({ message: "Successfully deleted the Startup!" });
+        const result = await Wishlist.findOneAndDelete({userId, companyId});
+        if(result)
+            return res.send({ message: "Successfully deleted the Startup!" });
+        else
+            return res.status(400).send("Unable to find the company in Wishlist");
     }
     catch (err) {
         res.status(400).send(err.message);

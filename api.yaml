@@ -282,6 +282,19 @@ paths:
     get:
       summary: "Get all Blogs"
       tags: [Blog]
+      parameters:
+        - in: query
+          name: pageNum
+          schema:
+            type: string
+          required: true
+          description: Page Number
+        - in: query
+          name: pageSize
+          schema:
+            type: string
+          required: true
+          description: Page Size
       responses: 
         "200":
           description: List of all Blogs
@@ -290,7 +303,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Blog"
+                  $ref: "#/components/schemas/BlogResponse"
     post:
       summary: Add a Blog
       tags: [Blog]
@@ -700,6 +713,18 @@ components:
         customerName:
           type: string
           example: "Kunal Shah"
+    BlogResponse:
+      type: object
+      required:
+        - data
+        - Pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Blog"
+        Pagination:
+          $ref: "#/components/schemas/Pagination"
     Blog:
       type: object
       required:
@@ -720,6 +745,26 @@ components:
         url: 
           type: string
           example: "https://medium.com/1531427186611"
+    Pagination:
+      type: object
+      required:
+        - currentPage
+        - pageSize
+        - totalRecords
+        - totalPages
+      properties:
+        currentPage:
+          type: string
+          example: "3"
+        pageSize:
+          type: string
+          example: "2"
+        totalRecords:
+          type: integer
+          example: 34
+        totalPages:
+          type: integer
+          example: 17
     BookRequest:
       type: object
       required:

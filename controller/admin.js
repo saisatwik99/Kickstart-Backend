@@ -194,9 +194,11 @@ exports.getBlog = async (req, res) => {
 
 // Post Blogs
 exports.postBlog = async (req, res) => {
-    
+    const imgResult = await cloudinary.uploader.upload(req.file.path);
+    const info = req.body;
+    info.postImageSrc = imgResult.url;
     try {
-        const result = await Blog.create(req.body);
+        const result = await Blog.create(info);
         res.send(result);
     }
     catch (err){

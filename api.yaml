@@ -311,9 +311,9 @@ paths:
         description: Data required to add Blog
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/Blog"
+              $ref: "#/components/schemas/PostBlog"
       responses:
         "200":
           description: Response
@@ -418,7 +418,7 @@ components:
   schemas:
     LoginRequest:
       type: object
-      request: 
+      required: 
         - email
         - password
       properties:
@@ -432,7 +432,7 @@ components:
           example: "saisatwik"
     Token:
       type: object
-      request:
+      required:
         - token
       properties:
         token:
@@ -441,7 +441,7 @@ components:
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ3YmIwY2RlODJjYmJjZmY2NjE4YjMiLCJlbWFpbCI6InNhaXNhdHdpazk5QGdtYWlsLmNvbSIsImlhdCI6MTY0OTA0ODc1Mn0.JQ2nj-LaYyogEVicVCntUWf8fxm09WTQ1mLEkjLNI4w"
     SignupRequest:
       type: object
-      request: 
+      required: 
         - name
         - email
         - phoneNumber
@@ -514,7 +514,7 @@ components:
       properties:
         image: 
           type: file
-          description: "Company Image URL"
+          description: "Company Image"
         title:
           type: string
           description: "Name of the company"
@@ -725,6 +725,26 @@ components:
             $ref: "#/components/schemas/Blog"
         Pagination:
           $ref: "#/components/schemas/Pagination"
+    PostBlog: 
+      type: object
+      required:
+        - image
+        - title
+        - authorName
+        - url
+      properties:
+        image: 
+          type: file
+          description: "Blog Image"
+        title:
+          type: string
+          example: "How I made $10M in one year"
+        authorName:
+          type: string
+          example: "Sai Satwik"
+        url: 
+          type: string
+          example: "https://medium.com/1531427186611"
     Blog:
       type: object
       required:

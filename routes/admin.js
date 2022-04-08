@@ -21,7 +21,7 @@ router.get('/pricingTestinomial', adminController.getPricingTestinomial);
 router.post('/pricingTestinomial', adminController.postPricingTestinomial);
 // Blog URL Get and Post Request
 router.get('/blog', adminController.getBlog);
-router.post('/blog', adminController.postBlog);
+router.post('/blog', multer.multerUploads, adminController.postBlog);
 // Book URL Post Request
 router.post('/book', adminController.postBook);
 // Wishlist URL Get, Post and Delete Request

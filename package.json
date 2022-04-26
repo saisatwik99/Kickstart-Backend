@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
@@ -40,5 +41,8 @@
     "redis": "^4.0.6",
     "swagger-ui-express": "^4.3.0",
     "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "supertest": "^6.2.2"
   }
 }

@@ -23,6 +23,7 @@ router.post('/pricingTestinomial', adminController.postPricingTestinomial);
 router.get('/blog', adminController.getBlog);
 router.post('/blog', multer.multerUploads, adminController.postBlog);
 // Book URL Post Request
+router.get('/book', adminController.getBook);
 router.post('/book', adminController.postBook);
 // Wishlist URL Get, Post and Delete Request
 router.get('/wishlist', adminController.getWishlist);

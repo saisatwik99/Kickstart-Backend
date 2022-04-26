@@ -12,7 +12,10 @@ const path           = require('path');
 const yaml           = require('yamljs');
 const swaggerui      = require('swagger-ui-express');
 const swaggerDoc     = yaml.load("./api.yaml");
+// const redis          = require('redis');
 
+// const REDIS_PORT = process.env.REDIS_PORT || 6379;
+// const client = redis.createClient(REDIS_PORT);
 // For creating a Session
 const app = express();
 const store = new MongoDBStore({
@@ -65,9 +68,11 @@ app.use("/user",userRoutes);
 mongoose
   .connect("mongodb://saisatwik-1:saisatwik@first-shard-00-00.fitvi.mongodb.net:27017,first-shard-00-01.fitvi.mongodb.net:27017,first-shard-00-02.fitvi.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=First-shard-0&authSource=admin&retryWrites=true&w=majority")
   .then(result => {
-    app.listen(process.env.PORT);
+    app.listen(process.env.PORT, '0.0.0.0');
     console.log("Server started");
   })
   .catch(err => {
     console.log(err);
   });
+
+module.exports = app;

@@ -9,6 +9,10 @@ const { CourierClient } = require("@trycourier/courier");
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const cloudinary = require('../config/cloudinaryConfig');
+const client = require('../config/redis.js');
+
+// const REDIS_URL = "redis://127.0.0.1.6379";
+// const client = redis.createClient(REDIS_URL);
 
 // Contact Schema Validation
 const contactSchema = Joi.object({
@@ -48,8 +52,19 @@ const contactSchema = Joi.object({
 
 // Get Trending Items
 exports.getTrending = async (req, res) => {
-    const Trendings = await Trending.find();
-    res.send(Object.values(Trendings));
+    const trending = await client.get("trending", (err, data) => {
+        if(err) throw err;
+        if(data !== null) {
+            return data;
+        }
+    });
+    if(trending == null) {
+        const Trendings = await Trending.find();
+        await client.set("trending", JSON.stringify(Trendings));
+        return res.send(Trendings);
+    } else {
+        return res.send(JSON.parse(trending));
+    }
 }
 
 // Post Trending Items 
@@ -67,6 +82,7 @@ exports.postTrending = async (req, res) => {
         const result = await Trending.create({ 
             image, name, price, type, trendingText, soldTime, location 
         });
+        await client.del("trendings");
         res.send(result);
     }
     catch (err){
@@ -76,12 +92,29 @@ exports.postTrending = async (req, res) => {
 
 // Get Company Items
 exports.getCompany = async (req, res) => {
-    var result = {Fintech: [], AI: [], Food: [], EdTech: []};
-    result.Fintech = await Company.find({category: 'Fintech'});
-    result.AI = await Company.find({category: 'AI'});
-    result.Food = await Company.find({category: 'Food'});
-    result.EdTech = await Company.find({category: 'EdTech'});
-    res.send(result);
+
+    // await redis.connect();
+    const companies = await client.get("company", (err, data) => {
+        if(err) throw err;
+        if(data !== null) {
+            console.log("I am inside redis");
+            return data;
+        }
+    });
+    if(companies == null) {
+        var result = {Fintech: [], AI: [], Food: [], EdTech: []};
+        result.Fintech = await Company.find({category: 'Fintech'});
+        result.AI = await Company.find({category: 'AI'});
+        result.Food = await Company.find({category: 'Food'});
+        result.EdTech = await Company.find({category: 'EdTech'});
+        await client.set("company", JSON.stringify(result));
+        console.log("Data fetched from DB");
+        return res.json(result);
+    } else {
+        console.log("Data fetched from Redis");
+        return res.send(JSON.parse(companies));
+    }
+    
 }
 
 // Post Company Items
@@ -94,8 +127,10 @@ exports.postCompany = async (req, res) => {
         const result = await Company.create({ 
             imageSrc: imgResult.url, title, content1, content2, price, rating, reviews, category
         });
+        await client.del("company");
         res.send(result);
     }
+
     catch (err){
         res.status(400).send(err.message);
     }
@@ -206,27 +241,49 @@ exports.postBlog = async (req, res) => {
     }
 }
 
+// Get all Bookings
+exports.getBook = async (req, res) => {
+    const Bookings = await Slot.find();
+    res.send(Bookings);
+}
+
 // Book a Service
 exports.postBook = async (req, res) => {
     const { token } = req.body;
+    console.log(req.body);
+    if(req.body.name === undefined || req.body.hour === undefined || req.body.min === undefined || req.body.ampm === undefined || req.body.date === undefined)
+        return res.send({ message: "Please fill all the fields!", red: 1});
+    if((req.body.hour < 8 || req.body.hour == 12) && req.body.ampm == 0 )
+        return res.send({ message: "We are available bewteen 8:00AM to 8:00PM. Please select other time!", red: 1});
+        if((req.body.hour > 8 || req.body.hour == 12) && req.body.ampm == 1 )
+        return res.send({ message: "We are available bewteen 8:00AM to 8:00PM. Please select other time!", red: 1});
     const info = jwt.decode(token);
-    const courier = CourierClient({ authorizationToken: "dk_prod_897CZS3S6K4NZBQSZ9YJ0SM1B3TH" });
-
+    const courier = CourierClient({ authorizationToken: "pk_prod_3J3MVG89KD4R68NB3V2PJSKYPCXB" });
+    const ampm = 'AM';
+    if (req.body.ampm == 1)
+        ampm = 'PM';
+    const time = `${req.body.hour}:${req.body.min} ${ampm}`
     const { messageId } = await courier.send({
-    brand: "AMXGFPJ304424AQRMYXJ0446Z60N",
-    eventId: "6FD8Q8NE614BBWGNY71GEZ1860RT",
-    recipientId: "517959ec-e210-4bf5-a749-ebc482fb5815",
+    eventId: "8RBEVBVP7YMMPPK57A8C2912NNND",
+    recipientId: "9af5f0b8-c7b5-40a0-ace3-2c516861ceb5",
     profile: {
         email: info.email,
     },
     data: {
+        date: req.body.date,
+        time: time
     },
     override: {
     },
     });
+    console.log(req.body.date);
+    console.log(time);
     await Slot.create({
         userId: info._id, 
-        email: info.email
+        email: info.email,
+        date: req.body.date,
+        time,
+        name: req.body.name
     })
     res.send({ messageId, message: "We received your request. You will receive a mail shortly!" });
 }

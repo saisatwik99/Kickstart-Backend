@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  kickstart:
+    container_name: kickstart
+    restart: always
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+        PORT: 3000
+        REDIS_HOST: redisdb
+    depends_on:
+      - redisdb
+  redisdb:
+    container_name: redisdb
+    image: 'redis:latest'

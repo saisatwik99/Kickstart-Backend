@@ -14,6 +14,15 @@ const slotSchema = new Schema({
   createdAt: {
       type: Date,
       default: new Date()
+  },
+  date: {
+    type: String
+  },
+  time: {
+    type: String
+  },
+  name: {
+    type: String
   }
 });
 

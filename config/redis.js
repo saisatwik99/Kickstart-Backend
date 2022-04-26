@@ -23,7 +23,7 @@ client.on('connect', () => {
 
 // Log any error that may occur to the console
 client.on("error", (err) => {
-    console.log(`Error:${err}`);
+    // console.log(`Error:${err}`);
 });
 
 module.exports = client;

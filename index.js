@@ -64,6 +64,12 @@ app.use('/apidocs', swaggerui.serve, swaggerui.setup(swaggerDoc));
 app.use("/admin",adminRoutes);
 app.use("/user",userRoutes);
 
+app.use(express.static('./build'))
+console.log(__dirname)
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+})
+
 // Connecting to Mongoose
 mongoose
   .connect("mongodb://saisatwik-1:saisatwik@first-shard-00-00.fitvi.mongodb.net:27017,first-shard-00-01.fitvi.mongodb.net:27017,first-shard-00-02.fitvi.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=First-shard-0&authSource=admin&retryWrites=true&w=majority")
